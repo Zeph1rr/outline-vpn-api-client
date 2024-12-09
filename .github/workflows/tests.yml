@@ -11,39 +11,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Python 3.12
       - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
           python-version: 3.12
 
-      # Install Poetry
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
           pip install poetry
 
-      # Install dependencies
       - name: Install dependencies with Poetry
         run: |
           poetry install --no-root
 
-      # Set up SSH key
       - name: Configure SSH key
         env:
           PRIVATE_KEY: ${{ secrets.ID_RSA }}
         run: |
           mkdir -p ~/.ssh
-          echo "$PRIVATE_KEY" | sed 's/\\n/\n/g' > ~/.ssh/id_rsa
+          echo -e "$PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keygen -y -f ~/.ssh/id_rsa > /dev/null || echo "Invalid private key"
           ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
-      # Run tests
       - name: Run tests
         env:
           SSH_HOST: ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}
