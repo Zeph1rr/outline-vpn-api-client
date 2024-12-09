@@ -1,4 +1,5 @@
 import pytest
+import json
 
 from outline_vpn_api_client import OutlineClient, ResponseNotOkException
 
@@ -54,3 +55,6 @@ def test_access_key_delete(id: int, client: OutlineClient):
     with pytest.raises(ResponseNotOkException) as _ex:
         client.access_keys.get(id)
         assert 404 in _ex
+
+def test_access_key_str_print(client: OutlineClient):
+    assert json.loads(str(client.access_keys)) == client.access_keys.get_all()
