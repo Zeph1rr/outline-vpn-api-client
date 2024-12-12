@@ -25,17 +25,23 @@ def do_ssh_request(host, command):
 
 def run_server():
     try:
+        # Загрузка скрипта
         result = subprocess.run(
-            ["sudo", "bash", "-c", '"$(wget -qO- https://outline-vpn.com/install-server.php)"'],
+            ["wget", "-qO-", "https://outline-vpn.com/install-server.php"],
+            stdout=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+
+        # Выполнение скрипта
+        script_content = result.stdout
+        subprocess.run(
+            ["sudo", "bash", "-c", script_content],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
             check=True
         )
-
-        # Вывод команды
-        output = result.stdout
-        return output
     except subprocess.CalledProcessError as e:
         print(f"Ошибка при выполнении команды: {e}")
         print(f"Стандартный вывод: {e.stdout}")
@@ -47,7 +53,7 @@ def stop_server():
             ["docker", "rm", "-f", "shadowbox", "watchtower"]
         )
         subprocess.run(
-            ["rm", "-rf", "/opt/outline"]
+            ["sudo", "rm", "-rf", "/opt/outline"]
         )
     except subprocess.CalledProcessError as e:
         print(f"Ошибка при выполнении команды: {e}")
