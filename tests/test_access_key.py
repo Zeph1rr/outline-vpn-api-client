@@ -24,7 +24,7 @@ def test_access_key_create(name: str, limit: int, client: OutlineClient):
     if limit:
         assert user.get("dataLimit").get("bytes") == 150000000000
 
-@pytest.mark.parametrize('id, name, limit, is_error', [(212, 'third_test_client', None, False), (415, 'fourth_test_client', 150000000000, False), (3, 'fourth_test_client', 150000000000, True)])
+@pytest.mark.parametrize('id, name, limit, is_error', [(212, 'third_test_client', None, False), (415, 'fourth_test_client', 150000000000, False), (415, 'fourth_test_client', 150000000000, True)])
 def test_access_key_create_with_special_id(id: int, name: str, limit: int, is_error: bool,  client: OutlineClient):
     if is_error:
         with pytest.raises(ResponseNotOkException) as _ex:
