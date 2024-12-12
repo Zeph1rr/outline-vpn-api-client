@@ -28,13 +28,9 @@ jobs:
         run: |
           poetry install --no-root
 
-      # Убедиться, что Docker установлен
-      - name: Ensure Docker is running
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
-          sudo systemctl start docker
-          sudo systemctl enable docker
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       # Запуск тестов
       - name: Run tests
