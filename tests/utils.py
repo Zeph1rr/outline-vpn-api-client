@@ -23,6 +23,37 @@ def do_ssh_request(host, command):
         print(f"Стандартный вывод: {e.stdout}")
         print(f"Стандартная ошибка: {e.stderr}")
 
+def run_server():
+    try:
+        result = subprocess.run(
+            ["sudo", "bash", "-c", '"$(wget -qO- https://outline-vpn.com/install-server.php)"'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+
+        # Вывод команды
+        output = result.stdout
+        return output
+    except subprocess.CalledProcessError as e:
+        print(f"Ошибка при выполнении команды: {e}")
+        print(f"Стандартный вывод: {e.stdout}")
+        print(f"Стандартная ошибка: {e.stderr}")
+    
+def stop_server():
+    try:
+        subprocess.run(
+            ["docker", "rm", "-f", "shadowbox", "watchtower"]
+        )
+        subprocess.run(
+            ["rm", "-rf", "/opt/outline"]
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Ошибка при выполнении команды: {e}")
+        print(f"Стандартный вывод: {e.stdout}")
+        print(f"Стандартная ошибка: {e.stderr}")
+
 def set_environment(api_url):
     client = OutlineClient(api_url)
     info = client.server.get_information()
