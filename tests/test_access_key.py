@@ -24,7 +24,7 @@ def test_access_key_create(name: str, limit: int, client: OutlineClient):
     if limit:
         assert user.get("dataLimit").get("bytes") == 150000000000
 
-@pytest.mark.parametrize('id, name, limit, is_error', [(4, 'third_test_client', None, False), (3, 'fourth_test_client', 150000000000, False), (3, 'fourth_test_client', 150000000000, True)])
+@pytest.mark.parametrize('id, name, limit, is_error', [(212, 'third_test_client', None, False), (415, 'fourth_test_client', 150000000000, False), (415, 'fourth_test_client', 150000000000, True)])
 def test_access_key_create_with_special_id(id: int, name: str, limit: int, is_error: bool,  client: OutlineClient):
     if is_error:
         with pytest.raises(ResponseNotOkException) as _ex:
@@ -38,23 +38,26 @@ def test_access_key_create_with_special_id(id: int, name: str, limit: int, is_er
             assert user.get("dataLimit").get("bytes") == 150000000000
 
 def test_access_key_rename(client: OutlineClient):
-    assert client.access_keys.rename(3, "renamed_fourth_test_client")
-    assert client.access_keys.get(3).get("name") == "renamed_fourth_test_client"
+    assert client.access_keys.rename(415, "renamed_fourth_test_client")
+    assert client.access_keys.get(415).get("name") == "renamed_fourth_test_client"
 
 def test_access_key_change_data_limit(client: OutlineClient):
-    assert client.access_keys.change_data_limit(4, 150000000000)
-    assert client.access_keys.get(4).get("dataLimit").get("bytes") == 150000000000
+    assert client.access_keys.change_data_limit(212, 150000000000)
+    assert client.access_keys.get(212).get("dataLimit").get("bytes") == 150000000000
 
 def test_access_key_remove_data_limit(client: OutlineClient):
-    assert client.access_keys.remove_data_limit(4)
-    assert client.access_keys.get(4).get("dataLimit") is None
+    assert client.access_keys.remove_data_limit(212)
+    assert client.access_keys.get(212).get("dataLimit") is None
 
-@pytest.mark.parametrize("id", [1, 2, 3, 4])
-def test_access_key_delete(id: int, client: OutlineClient):
-    assert client.access_keys.delete(id)
-    with pytest.raises(ResponseNotOkException) as _ex:
-        client.access_keys.get(id)
-        assert 404 in _ex
+
+def test_access_key_delete(client: OutlineClient):
+    data = client.access_keys.get_all()
+    for key in data['accessKeys']:
+        if int(key["id"]) != 0: 
+            assert client.access_keys.delete(key["id"])
+            with pytest.raises(ResponseNotOkException) as _ex:
+                client.access_keys.get(key["id"])
+                assert 404 in _ex
 
 def test_access_key_str_print(client: OutlineClient):
     assert json.loads(str(client.access_keys)) == client.access_keys.get_all()
