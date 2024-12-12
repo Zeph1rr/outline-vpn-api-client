@@ -51,18 +51,23 @@ jobs:
         run: |
           poetry publish --username __token__ --password $POETRY_PYPI_TOKEN_PYPI
 
+      - name: Changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
+        env:
+          REPO: ${{ github.repository }}
+
       # Шаг 8: Создание релиза на GitHub
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
           body: |
-            🎉 New release version ${{ github.ref_name }} is available!
-            - Automatically versioned by tag
+            ${{ steps.Changelog.outputs.changelog }}
           draft: false
           prerelease: false
 
