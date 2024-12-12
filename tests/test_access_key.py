@@ -52,7 +52,7 @@ def test_access_key_remove_data_limit(client: OutlineClient):
 
 def test_access_key_delete(client: OutlineClient):
     data = client.access_keys.get_all()
-    for key in data['access_key']:
+    for key in data['accessKeys']:
         assert client.access_keys.delete(key["id"])
         with pytest.raises(ResponseNotOkException) as _ex:
             client.access_keys.get(key["id"])
