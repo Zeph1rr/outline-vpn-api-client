@@ -7,7 +7,7 @@ from outline_vpn_api_client import OutlineClient
 from .utils import *
 
 @pytest.fixture(scope="session", autouse=True)
-def run_server():
+def prepare_server():
     output = run_server()
     api_url = find_api_url(output)
     set_environment(api_url)
