@@ -35,13 +35,14 @@ def run_server():
 
         # Выполнение скрипта
         script_content = result.stdout
-        subprocess.run(
+        result = subprocess.run(
             ["sudo", "bash", "-c", script_content],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
             check=True
         )
+        return result.stdout
     except subprocess.CalledProcessError as e:
         print(f"Ошибка при выполнении команды: {e}")
         print(f"Стандартный вывод: {e.stdout}")
