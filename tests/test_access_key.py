@@ -49,12 +49,14 @@ def test_access_key_remove_data_limit(client: OutlineClient):
     assert client.access_keys.remove_data_limit(4)
     assert client.access_keys.get(4).get("dataLimit") is None
 
-@pytest.mark.parametrize("id", [1, 2, 3, 4])
-def test_access_key_delete(id: int, client: OutlineClient):
-    assert client.access_keys.delete(id)
-    with pytest.raises(ResponseNotOkException) as _ex:
-        client.access_keys.get(id)
-        assert 404 in _ex
+
+def test_access_key_delete(client: OutlineClient):
+    data = client.access_keys.get_all()
+    for key in data['access_key']:
+        assert client.access_keys.delete(key["id"])
+        with pytest.raises(ResponseNotOkException) as _ex:
+            client.access_keys.get(key["id"])
+            assert 404 in _ex
 
 def test_access_key_str_print(client: OutlineClient):
     assert json.loads(str(client.access_keys)) == client.access_keys.get_all()

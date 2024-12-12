@@ -4,16 +4,15 @@ import os
 import pytest
 
 from outline_vpn_api_client import OutlineClient
-from .utils import *
 
 @pytest.fixture(scope="session", autouse=True)
-def prepare_server():
-    output = run_server()
-    api_url = find_api_url(output)
-    set_environment(api_url)
-    print(os.environ)
-    yield
-    stop_server()
+def set_environment():
+    api_url = os.getenv("API_URL")
+    client = OutlineClient(api_url)
+    info = client.server.get_information()
+    os.environ["OUTLINE_URL"] = api_url
+    os.environ["OUTLINE_SERVER_ID"] = info['serverId']
+    os.environ["OUTLINE_DEFAULT_PORT"] = str(info['portForNewAccessKeys'])
 
 @pytest.fixture()
 def client() -> OutlineClient:

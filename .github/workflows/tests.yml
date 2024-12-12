@@ -28,16 +28,9 @@ jobs:
         run: |
           poetry install --no-root
 
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Ensure bash installed
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y bash
-
       # Запуск тестов
       - name: Run tests
+        env:
+          API_URL: ${{ secrets.API_URL }}
         run: |
           poetry run pytest -v --cov-report term --cov=outline_vpn_api_client tests/
