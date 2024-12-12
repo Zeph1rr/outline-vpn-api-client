@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Шаг 1: Клонирование кода
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Шаг 2: Установка Python
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      # Шаг 3: Установка Poetry
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      # Шаг 4: Установка зависимостей без установки самого проекта
+      - name: Install dependencies
+        run: |
+          poetry install --no-root
+
+      # Шаг 5: Обновление версии в pyproject.toml с использованием тега
+      - name: Update version using tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          echo "Setting version to $TAG"
+          poetry version $TAG
+
+      # Шаг 6: Сборка пакетов (sdist и wheel)
+      - name: Build package
+        run: |
+          poetry build
+
+      # Шаг 7: Публикация пакета на PyPI
+      - name: Publish to PyPI
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          poetry publish --username __token__ --password $POETRY_PYPI_TOKEN_PYPI
+
+      # Шаг 8: Создание релиза на GitHub
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            🎉 New release version ${{ github.ref_name }} is available!
+            - Automatically versioned by tag
+          draft: false
+          prerelease: false
+
+      # Шаг 9: Загрузка wheel файлов в релиз
+      - name: Upload wheel files to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/
+          asset_name: "*.whl"
+          asset_content_type: application/octet-stream
