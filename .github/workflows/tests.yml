@@ -28,6 +28,12 @@ jobs:
         run: |
           poetry install --no-root
 
+      - name: Debug SSH key
+        env:
+          PRIVATE_KEY: ${{ secrets.ID_RSA }}
+        run: |
+          echo "$PRIVATE_KEY" | tr -d '\r' | ssh-keygen -y -f /dev/stdin || echo "Invalid private key"
+
       - name: Configure SSH key
         env:
           PRIVATE_KEY: ${{ secrets.ID_RSA }}
@@ -36,6 +42,8 @@ jobs:
           echo -e "$PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          cat ~/.ssh/id_rsa
+          readlink -f ~/.ssh/id_rsa
 
       - name: Run tests
         env:
