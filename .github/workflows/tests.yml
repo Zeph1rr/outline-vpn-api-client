@@ -35,7 +35,7 @@ jobs:
           mkdir -p ~/.ssh
           echo -e "$PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.REMOTE_HOST }} -i ~/.ssh/id_rsa >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
       - name: Run tests
         env:
