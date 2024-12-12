@@ -8,7 +8,7 @@ from outline_vpn_api_client import OutlineClient
 def do_ssh_request(host, command):
     try:
         result = subprocess.run(
-            ["ssh", host, command],
+            ["ssh", "-i", "~/.ssh/id_rsa", host, command],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
