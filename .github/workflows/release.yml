@@ -1,9 +1,8 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 jobs:
   release:
@@ -57,27 +56,9 @@ jobs:
         env:
           REPO: ${{ github.repository }}
 
-      # Шаг 8: Создание релиза на GitHub
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
+      - name: Upload wheel to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*.whl  # Указываем путь к zip архиву
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          body: |
-            ${{ steps.Changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
-
-      # Шаг 9: Загрузка wheel файлов в релиз
-      - name: Upload wheel files to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/
-          asset_name: "*.whl"
-          asset_content_type: application/octet-stream
