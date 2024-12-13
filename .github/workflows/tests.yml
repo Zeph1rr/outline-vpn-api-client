@@ -28,7 +28,6 @@ jobs:
         run: |
           poetry install --no-root
 
-      # Запуск тестов
       - name: Run tests
         env:
           API_URL: ${{ secrets.API_URL }}
