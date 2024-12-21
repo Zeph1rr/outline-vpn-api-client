@@ -1,5 +1,4 @@
 from .client import OutlineClient
-from .client import ResponseNotOkException
-from .async_client import AsyncOutlineClient
+from .error import ResponseNotOkException
 
-__all__ = [OutlineClient, ResponseNotOkException, AsyncOutlineClient]
+__all__ = [OutlineClient, ResponseNotOkException]
