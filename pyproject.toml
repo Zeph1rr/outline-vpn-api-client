@@ -8,11 +8,15 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 requests = "^2.32.3"
+httpx = {extras = ["http2"], version = "^0.28.1", optional = true }
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 pytest-cov = "^6.0.0"
+
+[tool.poetry.extras]
+async = ["httpx"]
 
 [build-system]
 requires = ["poetry-core"]
