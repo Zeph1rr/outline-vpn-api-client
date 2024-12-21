@@ -44,7 +44,7 @@ To get started with the library, you need to obtain the `management_url` for you
 ### Initializing the Client
 
 ```python
-from .client import OutlineClient
+from outline_vpn_api_client import OutlineClient
 
 # Replace 'your.management.url' with your actual management URL
 management_url = "your.management.url"
@@ -105,6 +105,25 @@ For example, if the API returns a 404 error with the message "Not Found", the ex
 
 ```
 outline_vpn_api_client.client.ResponseNotOkException: An error occured: 404 - {'code': 'NotFound', 'message': 'Access key "100" not found'}    
+```
+
+### Async Usage
+
+For use async client install async version of package:
+```
+pip install outline-vpn-api-client[async]
+```
+
+Then import async client and create instance of this
+
+```
+from outline_vpn_api_client.async_client import AsyncOutlineClient
+
+# Replace 'your.management.url' with your actual management URL
+management_url = "your.management.url"
+
+# Create an OutlineClient instance
+client = AsyncOutlineClient(management_url=management_url)
 ```
 
 ### Console Version

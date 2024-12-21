@@ -9,8 +9,6 @@ def main(client: OutlineClient, action: str):
     match(action):
         case "get_info":
             print(json.dumps(client.get_information(), ensure_ascii=False, indent=4))
-        case "data_transfer":
-            print(json.dumps(client.metrics.get_data_transfer(), ensure_ascii=False, indent=4))
         case _:
             raise NotImplementedError("Usage: python -m outline_vpn_api_client management_url get_info")
 
