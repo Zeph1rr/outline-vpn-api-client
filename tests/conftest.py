@@ -15,8 +15,8 @@ def set_environment():
     client = OutlineClient(api_url)
     info = client.server.get_information()
     os.environ["OUTLINE_URL"] = api_url
-    os.environ["OUTLINE_SERVER_ID"] = info['serverId']
-    os.environ["OUTLINE_DEFAULT_PORT"] = str(info['portForNewAccessKeys'])
+    os.environ["OUTLINE_SERVER_ID"] = info.serverId
+    os.environ["OUTLINE_DEFAULT_PORT"] = str(info.portForNewAccessKeys)
 
 @pytest.fixture()
 def client() -> OutlineClient:

@@ -328,7 +328,7 @@ class AccessKeys(BaseRoute):
         self.base_url = f"{self.base_url}/access-keys"
 
     def __str__(self):
-        return json.dumps(self.get_all(), ensure_ascii=False, indent=4)
+        return json.dumps(self.get_all().model_dump(), ensure_ascii=False, indent=4)
 
     def get_all(self) -> models.AccessKeyList:
         """

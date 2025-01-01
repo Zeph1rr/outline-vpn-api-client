@@ -641,8 +641,4 @@ async = ["httpx"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-<<<<<<< HEAD
-content-hash = "326d812cf0daf4ea236d3b44fde8f87645dc2fc244e147b7885729c0f96ed0d6"
-=======
 content-hash = "fa0e2c014a33dc29b554019c0ab21d206719cffb26cc3c8bb3d49625f85ce29e"
->>>>>>> develop
