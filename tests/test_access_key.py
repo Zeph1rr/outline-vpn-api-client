@@ -5,7 +5,7 @@ from outline_vpn_api_client import OutlineClient, ResponseNotOkException
 
 def test_acess_key_get_all(client: OutlineClient):
     data = client.access_keys.get_all()
-    assert len(data) == 1
+    assert len(data.accessKeys) == 1
     assert data.accessKeys[0].id == '0'
 
 @pytest.mark.parametrize('id, is_error', [(0, False), (10, True)])
