@@ -4,6 +4,7 @@ from typing import Optional
 import requests
 from requests.models import Response
 
+from . import models
 from .error import ResponseNotOkException
 
 def _get_error_message(status_code: int, error: str) -> str:
@@ -81,9 +82,9 @@ class Server(BaseRoute):
                         You should set this flag to `False` if the server's SSL certificate is self-signed or if no certificate is present.
     """
     def __str__(self):
-        return json.dumps(self.get_information(), ensure_ascii=False)
+        return json.dumps(self.get_information().model_dump(), ensure_ascii=False, indent=4)
 
-    def get_information(self) -> dict:
+    def get_information(self) -> models.Server:
         """
         Returns information about the server.
 
@@ -99,7 +100,7 @@ class Server(BaseRoute):
         response = requests.get(f"{self.base_url}/server", verify=self.ssl_verify)
         response_json = response.json()
         _check_response(response, response_json)
-        return response_json
+        return models.Server.model_validate(response_json)
     
     def change_hostname(self, hostname: str) -> bool:
         """
@@ -232,7 +233,7 @@ class Metrics(BaseRoute):
         self.base_url = f"{self.base_url}/metrics"
 
     def __str__(self):
-        return json.dumps({'enabled': self.check_enabled()}, ensure_ascii=False)
+        return json.dumps({'enabled': self.check_enabled()}, ensure_ascii=False, indent=4)
 
     def check_enabled(self) -> bool:
         """
@@ -275,7 +276,7 @@ class Metrics(BaseRoute):
         _check_response(response)
         return True
     
-    def get_data_transfer(self) -> dict:
+    def get_data_transfer(self) -> models.BytesTransferredByUserId:
         """
         Returns the data transferred per access key on the Outline VPN server.
 
@@ -304,7 +305,7 @@ class Metrics(BaseRoute):
         response = requests.get(f"{self.base_url}/transfer", verify=self.ssl_verify)
         response_json = response.json()
         _check_response(response, response_json)
-        return response_json
+        return models.BytesTransferredByUserId.model_validate(response_json)
 
 class AccessKeys(BaseRoute):
     """
@@ -327,9 +328,9 @@ class AccessKeys(BaseRoute):
         self.base_url = f"{self.base_url}/access-keys"
 
     def __str__(self):
-        return json.dumps(self.get_all(), ensure_ascii=False)
+        return json.dumps(self.get_all(), ensure_ascii=False, indent=4)
 
-    def get_all(self) -> dict:
+    def get_all(self) -> models.AccessKeyList:
         """
         Lists all the access keys on the Outline VPN server.
 
@@ -345,9 +346,9 @@ class AccessKeys(BaseRoute):
         response = requests.get(self.base_url, verify=self.ssl_verify)
         response_json = response.json()
         _check_response(response, response_json)
-        return response_json
+        return models.AccessKeyList.model_validate(response_json)
     
-    def get(self, id: int) -> dict:
+    def get(self, id: int) -> models.AccessKey:
         """
         Retrieves the details of a specific access key on the Outline VPN server.
 
@@ -366,9 +367,9 @@ class AccessKeys(BaseRoute):
         response = requests.get(f"{self.base_url}/{id}", verify=self.ssl_verify)
         response_json = response.json()
         _check_response(response, response_json)
-        return response_json
+        return models.AccessKey.model_validate(response_json)
     
-    def create(self, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> dict:
+    def create(self, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> models.AccessKey:
         """
         Creates a new access key on the Outline VPN server.
 
@@ -399,9 +400,9 @@ class AccessKeys(BaseRoute):
         response = requests.post(f"{self.base_url}", json=data, verify=self.ssl_verify)
         response_json = response.json()
         _check_response(response, response_json)
-        return response_json
+        return  models.AccessKey.model_validate(response_json)
     
-    def create_with_special_id(self, id: int, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> dict:
+    def create_with_special_id(self, id: int, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> models.AccessKey:
         """
         Creates a new access key on the Outline VPN server with a specific identifier.
 
@@ -434,7 +435,7 @@ class AccessKeys(BaseRoute):
         response = requests.put(f"{self.base_url}/{id}", json=data, verify=self.ssl_verify)
         response_json = response.json()
         _check_response(response, response_json)
-        return response_json
+        return models.AccessKey.model_validate(response_json)
     
     def delete(self, id: int) -> bool:
         """
@@ -556,9 +557,9 @@ class OutlineClient:
         self.access_keys = AccessKeys(management_url, ssl_verify)
 
     def __str__(self):
-        return json.dumps(self.get_information(), ensure_ascii=False)
+        return json.dumps(self.get_information().model_dump(), ensure_ascii=False, indent=4)
     
-    def get_information(self):
+    def get_information(self) -> models.Info:
         """
         Retrieves detailed information about the Outline server, including its configuration, metrics, and access keys.
 
@@ -576,10 +577,10 @@ class OutlineClient:
 
                 - `access_keys`: A list of all access keys.
         """
-        return {
+        return models.Info.model_validate({
             "server": self.server.get_information(),
             "metrics": {
                 "enabled": self.metrics.check_enabled()
             },
             "access_keys": self.access_keys.get_all()
-        }
+        })

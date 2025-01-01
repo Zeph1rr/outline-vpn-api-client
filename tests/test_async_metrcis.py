@@ -12,4 +12,4 @@ async def test_async_metrics_change_enabled_state(state: bool, async_client: Asy
 
 async def test_async_metrics_get_data_transfer(async_client: AsyncOutlineClient):
     response = await async_client.metrics.get_data_transfer()
-    assert response.get("bytesTransferredByUserId") is not None
+    assert response.bytesTransferredByUserId is not None
