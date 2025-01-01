@@ -1,14 +1,13 @@
 from sys import argv
 
 import warnings
-import json
 
 from .client import OutlineClient
 
 def main(client: OutlineClient, action: str):
     match(action):
         case "get_info":
-            print(json.dumps(client.get_information(), ensure_ascii=False, indent=4))
+            print(client)
         case _:
             raise NotImplementedError("Usage: python -m outline_vpn_api_client management_url get_info")
 

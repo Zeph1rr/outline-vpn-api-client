@@ -1,6 +1,8 @@
 import json
 from typing import Optional
 
+
+from . import models
 from .error import ResponseNotOkException
 
 try:
@@ -77,13 +79,14 @@ class AsyncServer(AsyncBaseRoute):
         remove_server_default_limits() -> bool:
             Removes the data transfer limit for all access keys.
     """
-    async def get_information(self) -> dict:
+
+    async def get_information(self) -> models.Server:
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
             response = await client.get(f"{self.base_url}/server")
             response_json = response.json()
             _check_response(response, response_json)
-        return response_json
-
+        return models.Server.model_validate(response_json)
+    
     async def change_hostname(self, hostname: str) -> bool:
         data = {"hostname": hostname}
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
@@ -156,12 +159,12 @@ class AsyncMetrics(AsyncBaseRoute):
             _check_response(response)
         return True
 
-    async def get_data_transfer(self) -> dict:
+    async def get_data_transfer(self) -> models.BytesTransferredByUserId:
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
             response = await client.get(f"{self.base_url}/transfer")
             response_json = response.json()
             _check_response(response, response_json)
-        return response_json
+        return models.BytesTransferredByUserId.model_validate(response_json)
 
     def __str__(self):
         return json.dumps({"info": "AsyncMetrics object for managing server metrics"}, ensure_ascii=False)
@@ -202,21 +205,22 @@ class AsyncAccessKeys(AsyncBaseRoute):
         super().__init__(management_url, ssl_verify)
         self.base_url = f"{self.base_url}/access-keys"
 
-    async def get_all(self) -> dict:
+
+    async def get_all(self) -> models.AccessKeyList:
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
             response = await client.get(f"{self.base_url}")
             response_json = response.json()
             _check_response(response, response_json)
-        return response_json
+        return models.AccessKeyList.model_validate(response_json)
 
-    async def get(self, id: int) -> dict:
+    async def get(self, id: int) -> models.AccessKey:
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
             response = await client.get(f"{self.base_url}/{id}")
             response_json = response.json()
             _check_response(response, response_json)
-        return response_json
+        return models.AccessKey.model_validate(response_json)
 
-    async def create(self, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> dict:
+    async def create(self, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> models.AccessKey:
         data = {"name": name, "method": method}
         if limit:
             data["limit"] = {"bytes": limit}
@@ -224,9 +228,10 @@ class AsyncAccessKeys(AsyncBaseRoute):
             response = await client.post(f"{self.base_url}", json=data)
             response_json = response.json()
             _check_response(response, response_json)
-        return response_json
+        return  models.AccessKey.model_validate(response_json)
 
-    async def create_with_special_id(self, id: int, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> dict:
+
+    async def create_with_special_id(self, id: int, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> models.AccessKey:
         data = {"name": name, "method": method}
         if limit:
             data["limit"] = {"bytes": limit}
@@ -234,7 +239,7 @@ class AsyncAccessKeys(AsyncBaseRoute):
             response = await client.put(f"{self.base_url}/{id}", json=data)
             response_json = response.json()
             _check_response(response, response_json)
-        return response_json
+        return models.AccessKey.model_validate(response_json)
 
     async def delete(self, id: int) -> bool:
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
@@ -287,7 +292,7 @@ class AsyncOutlineClient:
         self.metrics = AsyncMetrics(management_url, ssl_verify)
         self.access_keys = AsyncAccessKeys(management_url, ssl_verify)
 
-    async def get_information(self) -> dict:
+    async def get_information(self) -> models.Info:
         """
         Retrieves detailed information about the Outline server, including its configuration, metrics, and access keys.
 
@@ -297,11 +302,11 @@ class AsyncOutlineClient:
                 - `metrics`: A dictionary with the status of metrics (e.g., if they are enabled).
                 - `access_keys`: A list of all access keys.
         """
-        return {
+        return models.Info.model_validate({
             "server": await self.server.get_information(),
             "metrics": {"enabled": await self.metrics.check_enabled()},
             "access_keys": await self.access_keys.get_all(),
-        }
+        })
 
     def __str__(self):
         return json.dumps({"info": "AsyncOutlineClient for Outline VPN server API"}, ensure_ascii=False)

@@ -122,7 +122,11 @@ from outline_vpn_api_client.async_client import AsyncOutlineClient
 # Replace 'your.management.url' with your actual management URL
 management_url = "your.management.url"
 
+<<<<<<< HEAD
 # Create an OutlineClient instance
+=======
+# Create an AsyncOutlineClient instance
+>>>>>>> develop
 client = AsyncOutlineClient(management_url=management_url)
 ```
 

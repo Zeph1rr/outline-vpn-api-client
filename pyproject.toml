@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.12"
 requests = "^2.32.3"
 httpx = {extras = ["http2"], version = "^0.28.1", optional = true }
+pydantic = "^2.10.4"
 
 
 [tool.poetry.group.dev.dependencies]
