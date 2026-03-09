@@ -313,8 +313,15 @@ class Metrics(BaseRoute):
         Returns detailed server metrics including tunnel time, data transferred,
         bandwidth, locations, and per-access-key statistics.
 
-        This is an experimental endpoint (`GET /experimental/server/metrics`).
-        Note: the endpoint and its response format may change in future server versions.
+        !!! warning "Experimental endpoint"
+            This method uses `GET /experimental/server/metrics`, which is an unstable
+            endpoint. Its availability and response format may change or break across
+            different Outline server versions. Use with caution in production.
+
+        Note:
+            This endpoint requires metrics sharing to be enabled on the server
+            (`client.metrics.change_enabled_state(True)`). It will return an error
+            if metrics are disabled.
 
         Args:
             since (datetime): The start of the time range for which to return metrics.
