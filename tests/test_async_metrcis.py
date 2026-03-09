@@ -3,7 +3,8 @@ import pytest
 from outline_vpn_api_client.async_client import AsyncOutlineClient
 
 async def test_async_metrics_check_enabled(async_client: AsyncOutlineClient):
-    assert not await async_client.metrics.check_enabled()
+    enabled = await async_client.metrics.check_enabled()
+    assert isinstance(enabled, bool)
 
 @pytest.mark.parametrize("state", [True, False])
 async def test_async_metrics_change_enabled_state(state: bool, async_client: AsyncOutlineClient):

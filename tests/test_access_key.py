@@ -1,5 +1,6 @@
 import pytest
 import json
+from datetime import datetime, timezone, timedelta
 
 from outline_vpn_api_client import OutlineClient, ResponseNotOkException
 
@@ -61,3 +62,46 @@ def test_access_key_delete(client: OutlineClient):
 
 def test_access_key_str_print(client: OutlineClient):
     assert json.loads(str(client.access_keys)) == client.access_keys.get_all().model_dump()
+def test_access_key_create_with_password(client: OutlineClient):
+    user = client.access_keys.create(name="test_password_key", password="MyCustomPass123")
+    assert user.password == "MyCustomPass123"
+    client.access_keys.delete(user.id)
+
+def test_access_key_create_with_port(client: OutlineClient):
+    user = client.access_keys.create(name="test_port_key", port=19999)
+    assert user.port == 19999
+    client.access_keys.delete(user.id)
+
+def test_access_key_create_with_password_and_port(client: OutlineClient):
+    user = client.access_keys.create(
+        name="test_password_port_key",
+        password="MyCustomPass123",
+        port=19998,
+    )
+    assert user.password == "MyCustomPass123"
+    assert user.port == 19998
+    client.access_keys.delete(user.id)
+
+def test_access_key_create_with_special_id_and_password(client: OutlineClient):
+    user = client.access_keys.create_with_special_id(id=501, name="test_key_501", password="SpecialPass501")
+    assert user.id == "501"
+    assert user.password == "SpecialPass501"
+    client.access_keys.delete(user.id)
+
+def test_access_key_create_with_special_id_and_port(client: OutlineClient):
+    user = client.access_keys.create_with_special_id(id=502, name="test_key_502", port=19997)
+    assert user.id == "502"
+    assert user.port == 19997
+    client.access_keys.delete(user.id)
+
+def test_access_key_create_with_special_id_password_and_port(client: OutlineClient):
+    user = client.access_keys.create_with_special_id(
+        id=503,
+        name="test_key_503",
+        password="SpecialPass503",
+        port=19996,
+    )
+    assert user.id == "503"
+    assert user.password == "SpecialPass503"
+    assert user.port == 19996
+    client.access_keys.delete(user.id)

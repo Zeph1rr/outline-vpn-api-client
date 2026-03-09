@@ -63,3 +63,47 @@ async def test_access_key_delete(async_client: AsyncOutlineClient):
             with pytest.raises(ResponseNotOkException) as _ex:
                 await async_client.access_keys.get(key.id)
                 assert 404 in _ex
+                
+async def test_async_access_key_create_with_password(async_client: AsyncOutlineClient):
+    user = await async_client.access_keys.create(name="test_password_key", password="MyCustomPass123")
+    assert user.password == "MyCustomPass123"
+    await async_client.access_keys.delete(user.id)
+
+async def test_async_access_key_create_with_port(async_client: AsyncOutlineClient):
+    user = await async_client.access_keys.create(name="test_port_key", port=19999)
+    assert user.port == 19999
+    await async_client.access_keys.delete(user.id)
+
+async def test_async_access_key_create_with_password_and_port(async_client: AsyncOutlineClient):
+    user = await async_client.access_keys.create(
+        name="test_password_port_key",
+        password="MyCustomPass123",
+        port=19998,
+    )
+    assert user.password == "MyCustomPass123"
+    assert user.port == 19998
+    await async_client.access_keys.delete(user.id)
+
+async def test_async_access_key_create_with_special_id_and_password(async_client: AsyncOutlineClient):
+    user = await async_client.access_keys.create_with_special_id(id=501, name="test_key_501", password="SpecialPass501")
+    assert user.id == "501"
+    assert user.password == "SpecialPass501"
+    await async_client.access_keys.delete(user.id)
+
+async def test_async_access_key_create_with_special_id_and_port(async_client: AsyncOutlineClient):
+    user = await async_client.access_keys.create_with_special_id(id=502, name="test_key_502", port=19997)
+    assert user.id == "502"
+    assert user.port == 19997
+    await async_client.access_keys.delete(user.id)
+
+async def test_async_access_key_create_with_special_id_password_and_port(async_client: AsyncOutlineClient):
+    user = await async_client.access_keys.create_with_special_id(
+        id=503,
+        name="test_key_503",
+        password="SpecialPass503",
+        port=19996,
+    )
+    assert user.id == "503"
+    assert user.password == "SpecialPass503"
+    assert user.port == 19996
+    await async_client.access_keys.delete(user.id)

@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Optional
 
 import requests
@@ -22,7 +23,7 @@ def _get_error_message(status_code: int, error: str) -> str:
             str: A formatted error message string indicating the error, including the status code and the error description.
 
         """
-        return f"An error occured: {status_code} - {error}"
+        return f"An error occurred: {status_code} - {error}"
     
 def _check_response(response: Response, json: Optional[str] = None):
     """
@@ -307,6 +308,51 @@ class Metrics(BaseRoute):
         _check_response(response, response_json)
         return models.BytesTransferredByUserId.model_validate(response_json)
 
+    def get_server_metrics(self, since: datetime) -> models.ServerMetrics:
+        """
+        Returns detailed server metrics including tunnel time, data transferred,
+        bandwidth, locations, and per-access-key statistics.
+
+        !!! warning "Experimental endpoint"
+            This method uses `GET /experimental/server/metrics`, which is an unstable
+            endpoint. Its availability and response format may change or break across
+            different Outline server versions. Use with caution in production.
+
+        Note:
+            This endpoint requires metrics sharing to be enabled on the server
+            (`client.metrics.change_enabled_state(True)`). It will return an error
+            if metrics are disabled.
+
+        Args:
+            since (datetime): The start of the time range for which to return metrics.
+
+        Returns:
+            models.ServerMetrics: Detailed server and per-key metrics.
+
+        Raises:
+            ResponseNotOkException: If the server responds with a status code indicating an error (status code >= 300).
+
+        Example:
+            ```python
+            from datetime import datetime, timezone, timedelta
+
+            metrics = client.metrics.get_server_metrics(
+                since=datetime.now(timezone.utc) - timedelta(days=30)
+            )
+            print(metrics.server.dataTransferred.bytes)
+            ```
+        """
+        since_str = since.strftime("%Y-%m-%dT%H:%M:%SZ")
+        base = self.base_url.replace("/metrics", "")
+        response = requests.get(
+            f"{base}/experimental/server/metrics",
+            params={"since": since_str},
+            verify=self.ssl_verify,
+        )
+        response_json = response.json()
+        _check_response(response, response_json)
+        return models.ServerMetrics.model_validate(response_json)
+
 class AccessKeys(BaseRoute):
     """
     A class for managing access keys on the Outline VPN server.
@@ -369,18 +415,27 @@ class AccessKeys(BaseRoute):
         _check_response(response, response_json)
         return models.AccessKey.model_validate(response_json)
     
-    def create(self, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> models.AccessKey:
+    def create(
+        self,
+        name: str,
+        method: str = "aes-192-gcm",
+        password: Optional[str] = None,
+        port: Optional[int] = None,
+        limit: Optional[int] = None,
+    ) -> models.AccessKey:
         """
         Creates a new access key on the Outline VPN server.
 
         This method sends a request to the server to create a new access key. You can specify the name of the key, the 
-        encryption method to use, and optionally set a data transfer limit for the key. If no limit is provided, the key 
-        will have no data transfer restrictions.
+        encryption method to use, an optional password, an optional port, and optionally set a data transfer limit for
+        the key. If no limit is provided, the key will have no data transfer restrictions.
 
         Args:
             name (str): The name to assign to the new access key.
             method (str, optional): The encryption method to use for the access key. Default is "aes-192-gcm".
-            limit (int, optional): The data transfer limit for the access key in megabytes. If not provided, the key will 
+            password (str, optional): A custom password for the access key. If not provided, the server generates one.
+            port (int, optional): A custom port for the access key. If not provided, the server default port is used.
+            limit (int, optional): The data transfer limit for the access key in bytes. If not provided, the key will 
                                 have no transfer limit.
 
         Returns:
@@ -393,28 +448,40 @@ class AccessKeys(BaseRoute):
             "name": name,
             "method": method,
         }
-        if limit:
-            data['limit'] = {
-                "bytes": limit
-            }
+        if password is not None:
+            data["password"] = password
+        if port is not None:
+            data["port"] = port
+        if limit is not None:
+            data["limit"] = {"bytes": limit}
         response = requests.post(f"{self.base_url}", json=data, verify=self.ssl_verify)
         response_json = response.json()
         _check_response(response, response_json)
-        return  models.AccessKey.model_validate(response_json)
+        return models.AccessKey.model_validate(response_json)
     
-    def create_with_special_id(self, id: int, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> models.AccessKey:
+    def create_with_special_id(
+        self,
+        id: int,
+        name: str,
+        method: str = "aes-192-gcm",
+        password: Optional[str] = None,
+        port: Optional[int] = None,
+        limit: Optional[int] = None,
+    ) -> models.AccessKey:
         """
         Creates a new access key on the Outline VPN server with a specific identifier.
 
         This method sends a request to the server to create a new access key, allowing you to specify a custom ID for 
-        the key, along with the key's name, encryption method, and an optional data transfer limit. If no limit is provided, 
-        the key will have no data transfer restrictions.
+        the key, along with the key's name, encryption method, an optional password, an optional port, and an optional
+        data transfer limit. If no limit is provided, the key will have no data transfer restrictions.
 
         Args:
             id (int): The custom ID to assign to the new access key.
             name (str): The name to assign to the new access key.
             method (str, optional): The encryption method to use for the access key. Default is "aes-192-gcm".
-            limit (int, optional): The data transfer limit for the access key in megabytes. If not provided, the key will 
+            password (str, optional): A custom password for the access key. If not provided, the server generates one.
+            port (int, optional): A custom port for the access key. If not provided, the server default port is used.
+            limit (int, optional): The data transfer limit for the access key in bytes. If not provided, the key will 
                                 have no transfer limit.
 
         Returns:
@@ -428,10 +495,12 @@ class AccessKeys(BaseRoute):
             "name": name,
             "method": method,
         }
-        if limit:
-            data['limit'] = {
-                "bytes": limit
-            }
+        if password is not None:
+            data["password"] = password
+        if port is not None:
+            data["port"] = port
+        if limit is not None:
+            data["limit"] = {"bytes": limit}
         response = requests.put(f"{self.base_url}/{id}", json=data, verify=self.ssl_verify)
         response_json = response.json()
         _check_response(response, response_json)
@@ -487,13 +556,11 @@ class AccessKeys(BaseRoute):
         Sets a data transfer limit for the specified access key on the Outline VPN server.
 
         This method sends a request to the server to apply a data transfer limit for a specific access key, identified 
-        by its ID. The limit is specified in megabytes (MB). If the specified limit is set to `None`, it removes the 
-        data transfer restriction for the key.
+        by its ID. The limit is specified in bytes.
 
         Args:
             id (int): The ID of the access key for which the data transfer limit will be set.
-            limit (int): The data transfer limit in megabytes (MB) to apply to the access key. A value of `None` removes 
-                        any data transfer limits.
+            limit (int): The data transfer limit in bytes to apply to the access key.
 
         Returns:
             bool: `True` if the data transfer limit was successfully set for the access key.

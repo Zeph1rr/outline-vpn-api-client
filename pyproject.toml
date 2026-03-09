@@ -1,9 +1,24 @@
 [tool.poetry]
 name = "outline-vpn-api-client"
 version = "1.1.1"
-description = ""
+description = "Python client for the Outline VPN Management API. Manage access keys, server settings, and metrics programmatically."
 authors = ["zeph1rr <grianton535@gmail.com>"]
 readme = "README.md"
+homepage = "https://github.com/Zeph1rr/outline-vpn-api-client"
+repository = "https://github.com/Zeph1rr/outline-vpn-api-client"
+documentation = "https://github.com/Zeph1rr/outline-vpn-api-client#readme"
+keywords = ["outline", "vpn", "api", "client", "shadowsocks"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet",
+    "Topic :: System :: Networking",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -16,6 +31,12 @@ pydantic = "^2.10.4"
 pytest = "^8.3.4"
 pytest-cov = "^6.0.0"
 pytest-asyncio = "^0.25.0"
+
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.7.4"
+mkdocstrings = {extras = ["python"], version = "^1.0.3"}
 
 [tool.poetry.extras]
 async = ["httpx"]
