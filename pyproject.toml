@@ -6,7 +6,7 @@ authors = ["zeph1rr <grianton535@gmail.com>"]
 readme = "README.md"
 homepage = "https://github.com/Zeph1rr/outline-vpn-api-client"
 repository = "https://github.com/Zeph1rr/outline-vpn-api-client"
-documentation = "https://github.com/Zeph1rr/outline-vpn-api-client#readme"
+documentation = "https://outline-vpn-api-client.readthedocs.io/en/latest/"
 keywords = ["outline", "vpn", "api", "client", "shadowsocks"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",

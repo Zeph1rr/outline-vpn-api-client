@@ -1,12 +1,13 @@
 # OUTLINE-VPN-API-CLIENT
 
-![PyPI - Version](https://img.shields.io/pypi/v/outline-vpn-api-client?style=plastic)
+[![PyPI - Version](https://img.shields.io/pypi/v/outline-vpn-api-client?style=plastic)](https://pypi.org/project/outline-vpn-api-client/)
 ![PyPI - Format](https://img.shields.io/pypi/format/outline-vpn-api-client?style=plastic)
 ![GitHub Release](https://img.shields.io/github/v/release/Zeph1rr/outline-vpn-api-client?style=plastic)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Zeph1rr/outline-vpn-api-client/tests.yml?style=plastic&label=tests)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/outline-vpn-api-client?style=plastic)
 ![GitHub License](https://img.shields.io/github/license/zeph1rr/outline-vpn-api-client?style=plastic)
 [![Documentation Status](https://readthedocs.org/projects/outline-vpn-api-client/badge/?version=latest&style=plastic)](https://outline-vpn-api-client.readthedocs.io/en/latest/)
+
 
 ## DESCRIPTION
 
