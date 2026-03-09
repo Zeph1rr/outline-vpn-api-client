@@ -38,7 +38,6 @@ poetry add outline-vpn-api-client
 
 ## USAGE
 
-
 To get started with the library, you need to obtain the `management_url` for your Outline VPN server. Once you have the `management_url`, you can create an instance of the `OutlineClient` class to interact with the server.
 
 ### Initializing the Client
@@ -53,13 +52,15 @@ management_url = "your.management.url"
 client = OutlineClient(management_url=management_url)
 ```
 
+> **Note:** By default, SSL certificate verification is disabled (`ssl_verify=False`). This is intentional, as Outline servers typically use self-signed certificates. You can enable verification by passing `ssl_verify=True` if your server has a valid certificate.
+
 ### Retrieving Server Information
 
 ```python
 import json
 
 # Fetch server information and pretty-print it
-print(json.dumps(client.get_information(), ensure_ascii=False, indent=4))
+print(json.dumps(client.get_information().model_dump(), ensure_ascii=False, indent=4))
 ```
 
 ### Creating Access Keys
@@ -67,68 +68,125 @@ print(json.dumps(client.get_information(), ensure_ascii=False, indent=4))
 #### Creating a Key Without Limits
 
 ```python
-# Replace 'name' with a meaningful identifier for the key
 client.access_keys.create(name="Example Key")
 ```
 
-#### Creating a Key With a Limit
+#### Creating a Key With a Data Limit
 
 ```python
-# Replace 'name' with a meaningful identifier for the key
-# Replace 'limit' with the desired bandwidth limit in bytes
+# Replace 'limit' with the desired data limit in bytes
 client.access_keys.create(name="Example Key with Limit", limit=10**9)  # Example: 1 GB limit
 ```
 
+#### Creating a Key With a Custom Password and Port
+
+```python
+client.access_keys.create(
+    name="Example Key",
+    password="MyCustomPassword",
+    port=12345,
+)
+```
+
+#### Creating a Key With a Specific ID
+
+```python
+client.access_keys.create_with_special_id(
+    id=42,
+    name="Example Key",
+    password="MyCustomPassword",
+    port=12345,
+    limit=10**9,
+)
+```
+
+### Retrieving Server Metrics
+
+#### Basic Metrics (data transferred per key)
+
+```python
+transfer = client.metrics.get_data_transfer()
+print(transfer.bytesTransferredByUserId)
+```
+
+#### Detailed Server Metrics (experimental)
+
+```python
+from datetime import datetime, timezone, timedelta
+
+# Get metrics for the last 30 days
+metrics = client.metrics.get_server_metrics(
+    since=datetime.now(timezone.utc) - timedelta(days=30)
+)
+
+print(metrics.server.dataTransferred.bytes)
+print(metrics.server.bandwidth.peak.data.bytes)
+
+for key in metrics.accessKeys:
+    print(key.accessKeyId, key.dataTransferred.bytes if key.dataTransferred else 0)
+```
+
+> **Note:** This endpoint is experimental and may change in future versions of the Outline server.
+
 ### Handling Errors
 
-The library uses a custom exception, ResponseNotOkException, to handle server-side errors. This exception is raised whenever the API returns an unexpected response.
+The library uses a custom exception, `ResponseNotOkException`, to handle server-side errors. This exception is raised whenever the API returns an unexpected response.
 
 ```python
 from outline_vpn_api_client import ResponseNotOkException
 
 try:
-    # Attempting to fetch server information
     info = client.get_information()
     print(info)
 except ResponseNotOkException as e:
     print(e)
 ```
 
-The error message provides details about the HTTP status code and the error message returned by the API. It follows this format:
-
-```python
-def _get_error_message(status_code: int, error: str) -> str:
-    return f"An error occurred: {status_code} - {error}"
-```
-
-For example, if the API returns a 404 error with the message "Not Found", the exception will produce the message:
+The error message provides details about the HTTP status code and the error message returned by the API:
 
 ```
-outline_vpn_api_client.client.ResponseNotOkException: An error occured: 404 - {'code': 'NotFound', 'message': 'Access key "100" not found'}    
+outline_vpn_api_client.client.ResponseNotOkException: An error occurred: 404 - {'code': 'NotFound', 'message': 'Access key "100" not found'}
 ```
 
 ### Async Usage
 
-For use async client install async version of package:
+For async usage, install the async version of the package:
+
 ```
 pip install outline-vpn-api-client[async]
 ```
 
-Then import async client and create instance of this
+Then import the async client and create an instance:
 
-```
+```python
 from outline_vpn_api_client.async_client import AsyncOutlineClient
 
-# Replace 'your.management.url' with your actual management URL
 management_url = "your.management.url"
 
-# Create an AsyncOutlineClient instance
 client = AsyncOutlineClient(management_url=management_url)
+```
+
+All methods are identical to the sync client, but must be awaited:
+
+```python
+import asyncio
+from datetime import datetime, timezone, timedelta
+
+async def main():
+    info = await client.get_information()
+    print(info.model_dump())
+
+    metrics = await client.metrics.get_server_metrics(
+        since=datetime.now(timezone.utc) - timedelta(days=30)
+    )
+    print(metrics.server.dataTransferred.bytes)
+
+asyncio.run(main())
 ```
 
 ### Console Version
 
-The library also includes a command-line interface (CLI) for quick access. You can use the following command to interact with the server:
+The library also includes a command-line interface (CLI) for quick access:
 
 ```bash
 python3 -m outline_vpn_api_client management_url get_info

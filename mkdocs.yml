@@ -1,0 +1,29 @@
+site_name: outline-vpn-api-client
+site_url: https://zeph1rr.github.io/outline-vpn-api-client
+repo_url: https://github.com/Zeph1rr/outline-vpn-api-client
+repo_name: Zeph1rr/outline-vpn-api-client
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+
+nav:
+  - Home: index.md
+  - Usage: usage.md
+  - API Reference:
+    - OutlineClient: api/client.md
+    - AccessKeys: api/access_keys.md
+    - Metrics: api/metrics.md
+    - Server: api/server.md
+    - Models: api/models.md
+  - Changelog: changelog.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            docstring_style: google
