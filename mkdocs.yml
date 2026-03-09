@@ -12,10 +12,16 @@ nav:
   - Home: index.md
   - Usage: usage.md
   - API Reference:
-    - OutlineClient: api/client.md
-    - AccessKeys: api/access_keys.md
-    - Metrics: api/metrics.md
-    - Server: api/server.md
+    - Sync:
+      - OutlineClient: api/client.md
+      - AccessKeys: api/access_keys.md
+      - Metrics: api/metrics.md
+      - Server: api/server.md
+    - Async:
+      - AsyncOutlineClient: api/async_client.md
+      - AsyncAccessKeys: api/async_access_keys.md
+      - AsyncMetrics: api/async_metrics.md
+      - AsyncServer: api/async_server.md
     - Models: api/models.md
   - Changelog: changelog.md
 
