@@ -63,6 +63,7 @@ async def test_access_key_delete(async_client: AsyncOutlineClient):
             with pytest.raises(ResponseNotOkException) as _ex:
                 await async_client.access_keys.get(key.id)
                 assert 404 in _ex
+                
 async def test_async_access_key_create_with_password(async_client: AsyncOutlineClient):
     user = await async_client.access_keys.create(name="test_password_key", password="MyCustomPass123")
     assert user.password == "MyCustomPass123"
