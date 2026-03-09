@@ -335,11 +335,11 @@ class Metrics(BaseRoute):
             print(metrics.server.dataTransferred.bytes)
             ```
         """
-        since_ms = int(since.timestamp() * 1000)
+        since_str = since.strftime("%Y-%m-%dT%H:%M:%SZ")
         base = self.base_url.replace("/metrics", "")
         response = requests.get(
             f"{base}/experimental/server/metrics",
-            params={"since": since_ms},
+            params={"since": since_str},
             verify=self.ssl_verify,
         )
         response_json = response.json()
