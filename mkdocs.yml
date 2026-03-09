@@ -23,7 +23,6 @@ nav:
       - AsyncMetrics: api/async_metrics.md
       - AsyncServer: api/async_server.md
     - Models: api/models.md
-  - Changelog: changelog.md
 
 plugins:
   - search
