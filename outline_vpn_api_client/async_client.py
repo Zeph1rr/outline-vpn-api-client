@@ -260,7 +260,6 @@ class AsyncMetrics(AsyncBaseRoute):
 
         Args:
             since (datetime): The start of the time range for which to return metrics.
-                              Must be a timezone-aware datetime object.
 
         Returns:
             models.ServerMetrics: Detailed server and per-key metrics.
@@ -278,12 +277,12 @@ class AsyncMetrics(AsyncBaseRoute):
             print(metrics.server.dataTransferred.bytes)
             ```
         """
-        since_str = since.strftime("%Y-%m-%dT%H:%M:%SZ")
+        since_ms = int(since.timestamp() * 1000)
         base = self.base_url.replace("/metrics", "")
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
             response = await client.get(
                 f"{base}/experimental/server/metrics",
-                params={"since": since_str},
+                params={"since": since_ms},
             )
             response_json = response.json()
             _check_response(response, response_json)

@@ -318,7 +318,6 @@ class Metrics(BaseRoute):
 
         Args:
             since (datetime): The start of the time range for which to return metrics.
-                              Must be a timezone-aware datetime object.
 
         Returns:
             models.ServerMetrics: Detailed server and per-key metrics.
@@ -336,11 +335,11 @@ class Metrics(BaseRoute):
             print(metrics.server.dataTransferred.bytes)
             ```
         """
-        since_str = since.strftime("%Y-%m-%dT%H:%M:%SZ")
+        since_ms = int(since.timestamp() * 1000)
         base = self.base_url.replace("/metrics", "")
         response = requests.get(
             f"{base}/experimental/server/metrics",
-            params={"since": since_str},
+            params={"since": since_ms},
             verify=self.ssl_verify,
         )
         response_json = response.json()

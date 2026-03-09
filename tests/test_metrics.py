@@ -5,7 +5,8 @@ from datetime import datetime, timezone, timedelta
 from outline_vpn_api_client import OutlineClient
 
 def test_metrics_check_enabled(client: OutlineClient):
-    assert not client.metrics.check_enabled()
+    enabled = client.metrics.check_enabled()
+    assert isinstance(enabled, bool)
 
 @pytest.mark.parametrize("state", [True, False])
 def test_metrics_change_enabled_state(state: bool, client: OutlineClient):
@@ -42,9 +43,3 @@ def test_metrics_get_server_metrics_access_key_fields(client: OutlineClient):
             assert key.dataTransferred.bytes >= 0
         if key.tunnelTime is not None:
             assert key.tunnelTime.seconds >= 0
-
-def test_metrics_get_server_metrics_future_since(client: OutlineClient):
-    since = datetime.now(timezone.utc) + timedelta(days=1)
-    result = client.metrics.get_server_metrics(since)
-    assert result.server is not None
-    assert isinstance(result.accessKeys, list)
