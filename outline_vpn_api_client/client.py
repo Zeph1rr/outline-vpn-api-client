@@ -327,11 +327,14 @@ class Metrics(BaseRoute):
             ResponseNotOkException: If the server responds with a status code indicating an error (status code >= 300).
 
         Example:
-            >>> from datetime import datetime, timezone, timedelta
-            >>> metrics = client.metrics.get_server_metrics(
-            ...     since=datetime.now(timezone.utc) - timedelta(days=30)
-            ... )
-            >>> print(metrics.server.dataTransferred.bytes)
+            ```python
+            from datetime import datetime, timezone, timedelta
+
+            metrics = client.metrics.get_server_metrics(
+                since=datetime.now(timezone.utc) - timedelta(days=30)
+            )
+            print(metrics.server.dataTransferred.bytes)
+            ```
         """
         since_str = since.strftime("%Y-%m-%dT%H:%M:%SZ")
         base = self.base_url.replace("/metrics", "")
