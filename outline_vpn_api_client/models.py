@@ -45,3 +45,51 @@ class Info(BaseModel):
     server: Server
     metrics: Metrics
     access_keys: AccessKeyList
+
+
+# --- Experimental server metrics models ---
+
+class DataTransferred(BaseModel):
+    bytes: int
+
+class TunnelTime(BaseModel):
+    seconds: float
+
+class BandwidthSnapshot(BaseModel):
+    data: DataTransferred
+    timestamp: int
+
+class Bandwidth(BaseModel):
+    current: BandwidthSnapshot
+    peak: BandwidthSnapshot
+
+class LocationMetrics(BaseModel):
+    location: Optional[str] = None
+    asn: Optional[int] = None
+    asOrg: Optional[str] = None
+    tunnelTime: Optional[TunnelTime] = None
+    dataTransferred: Optional[DataTransferred] = None
+
+class PeakDeviceCount(BaseModel):
+    data: int
+    timestamp: int
+
+class AccessKeyConnection(BaseModel):
+    lastTrafficSeen: Optional[float] = None
+    peakDeviceCount: Optional[PeakDeviceCount] = None
+
+class AccessKeyMetrics(BaseModel):
+    accessKeyId: int
+    tunnelTime: Optional[TunnelTime] = None
+    dataTransferred: Optional[DataTransferred] = None
+    connection: Optional[AccessKeyConnection] = None
+
+class ServerMetricsData(BaseModel):
+    tunnelTime: Optional[TunnelTime] = None
+    dataTransferred: Optional[DataTransferred] = None
+    bandwidth: Optional[Bandwidth] = None
+    locations: Optional[list[LocationMetrics]] = None
+
+class ServerMetrics(BaseModel):
+    server: ServerMetricsData
+    accessKeys: list[AccessKeyMetrics]

@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Optional
 
 
@@ -166,6 +167,42 @@ class AsyncMetrics(AsyncBaseRoute):
             _check_response(response, response_json)
         return models.BytesTransferredByUserId.model_validate(response_json)
 
+    async def get_server_metrics(self, since: datetime) -> models.ServerMetrics:
+        """
+        Returns detailed server metrics including tunnel time, data transferred,
+        bandwidth, locations, and per-access-key statistics.
+
+        This is an experimental endpoint (`GET /experimental/server/metrics`).
+        Note: the endpoint and its response format may change in future server versions.
+
+        Args:
+            since (datetime): The start of the time range for which to return metrics.
+                              Must be a timezone-aware datetime object.
+
+        Returns:
+            models.ServerMetrics: Detailed server and per-key metrics.
+
+        Raises:
+            ResponseNotOkException: If the server responds with a status code indicating an error (status code >= 300).
+
+        Example:
+            >>> from datetime import datetime, timezone, timedelta
+            >>> metrics = await client.metrics.get_server_metrics(
+            ...     since=datetime.now(timezone.utc) - timedelta(days=30)
+            ... )
+            >>> print(metrics.server.dataTransferred.bytes)
+        """
+        since_str = since.strftime("%Y-%m-%dT%H:%M:%SZ")
+        base = self.base_url.replace("/metrics", "")
+        async with httpx.AsyncClient(verify=self.ssl_verify) as client:
+            response = await client.get(
+                f"{base}/experimental/server/metrics",
+                params={"since": since_str},
+            )
+            response_json = response.json()
+            _check_response(response, response_json)
+        return models.ServerMetrics.model_validate(response_json)
+
     def __str__(self):
         return json.dumps({"info": "AsyncMetrics object for managing server metrics"}, ensure_ascii=False)
 
@@ -183,11 +220,11 @@ class AsyncAccessKeys(AsyncBaseRoute):
         get(id: int) -> dict:
             Retrieves details of a specific access key by ID.
 
-        create(name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> dict:
-            Creates a new access key with optional data transfer limits.
+        create(name: str, method: str = "aes-192-gcm", password: Optional[str] = None, port: Optional[int] = None, limit: Optional[int] = None) -> dict:
+            Creates a new access key with optional password, port, and data transfer limits.
 
-        create_with_special_id(id: int, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> dict:
-            Creates a new access key with a specified ID and optional limits.
+        create_with_special_id(id: int, name: str, method: str = "aes-192-gcm", password: Optional[str] = None, port: Optional[int] = None, limit: Optional[int] = None) -> dict:
+            Creates a new access key with a specified ID, optional password, port, and limits.
 
         delete(id: int) -> bool:
             Deletes an access key by its ID.
@@ -205,7 +242,6 @@ class AsyncAccessKeys(AsyncBaseRoute):
         super().__init__(management_url, ssl_verify)
         self.base_url = f"{self.base_url}/access-keys"
 
-
     async def get_all(self) -> models.AccessKeyList:
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
             response = await client.get(f"{self.base_url}")
@@ -220,20 +256,77 @@ class AsyncAccessKeys(AsyncBaseRoute):
             _check_response(response, response_json)
         return models.AccessKey.model_validate(response_json)
 
-    async def create(self, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> models.AccessKey:
+    async def create(
+        self,
+        name: str,
+        method: str = "aes-192-gcm",
+        password: Optional[str] = None,
+        port: Optional[int] = None,
+        limit: Optional[int] = None,
+    ) -> models.AccessKey:
+        """
+        Creates a new access key on the Outline VPN server.
+
+        Args:
+            name (str): The name to assign to the new access key.
+            method (str, optional): The encryption method to use for the access key. Default is "aes-192-gcm".
+            password (str, optional): A custom password for the access key. If not provided, the server generates one.
+            port (int, optional): A custom port for the access key. If not provided, the server default port is used.
+            limit (int, optional): The data transfer limit for the access key in bytes. If not provided, the key will
+                                   have no transfer limit.
+
+        Returns:
+            models.AccessKey: The newly created access key.
+
+        Raises:
+            ResponseNotOkException: If the server responds with a status code indicating an error (status code >= 300).
+        """
         data = {"name": name, "method": method}
-        if limit:
+        if password is not None:
+            data["password"] = password
+        if port is not None:
+            data["port"] = port
+        if limit is not None:
             data["limit"] = {"bytes": limit}
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
             response = await client.post(f"{self.base_url}", json=data)
             response_json = response.json()
             _check_response(response, response_json)
-        return  models.AccessKey.model_validate(response_json)
+        return models.AccessKey.model_validate(response_json)
 
+    async def create_with_special_id(
+        self,
+        id: int,
+        name: str,
+        method: str = "aes-192-gcm",
+        password: Optional[str] = None,
+        port: Optional[int] = None,
+        limit: Optional[int] = None,
+    ) -> models.AccessKey:
+        """
+        Creates a new access key with a specific identifier.
 
-    async def create_with_special_id(self, id: int, name: str, method: str = "aes-192-gcm", limit: Optional[int] = None) -> models.AccessKey:
+        Args:
+            id (int): The custom ID to assign to the new access key.
+            name (str): The name to assign to the new access key.
+            method (str, optional): The encryption method to use for the access key. Default is "aes-192-gcm".
+            password (str, optional): A custom password for the access key. If not provided, the server generates one.
+            port (int, optional): A custom port for the access key. If not provided, the server default port is used.
+            limit (int, optional): The data transfer limit for the access key in bytes. If not provided, the key will
+                                   have no transfer limit.
+
+        Returns:
+            models.AccessKey: The newly created access key.
+
+        Raises:
+            ResponseNotOkException: If the server responds with a status code indicating an error (status code >= 300).
+        """
         data = {"name": name, "method": method}
-        if limit:
+        if password is not None:
+            data["password"] = password
+        if port is not None:
+            data["port"] = port
+        if limit is not None:
             data["limit"] = {"bytes": limit}
         async with httpx.AsyncClient(verify=self.ssl_verify) as client:
             response = await client.put(f"{self.base_url}/{id}", json=data)
